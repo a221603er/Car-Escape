@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Coche esquivando obstáculos</title>
+	<style>
+		canvas {
+			border: 1px solid black;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="500" height="500"></canvas>
+	<script>
+		// Configuración del juego
+		var canvas = document.getElementById("canvas");
+		var ctx = canvas.getContext("2d");
+		var carImg = new Image();
+		var obsImg = new Image();
+		var bgImg = new Image();
+		var carWidth = 50;
+		var carHeight = 50;
+		var obsWidth = 50;
+		var obsHeight = 50;
+		var carX = canvas.width / 2 - carWidth / 2;
+		var carY = canvas.height - carHeight - 10;
+		var obsX = Math.random() * (canvas.width - obsWidth);
+		var obsY = -obsHeight;
+		var obsSpeed = 5;
+		var score = 0;
+		var lives = 3;
+		var isGameOver = false;
+
+		carImg.src = "car.png";
+		obsImg.src = "obs.png";
+		bgImg.src = "fon.jpg";
+
+		// Función principal del juego
+		function main() {
+			// Actualiza la posición del coche y el obstáculo
+			update();
+
+			// Dibuja el fondo y los objetos del juego en el canvas
+			draw();
+
+			// Actualiza el puntaje y las vidas en la pantalla
+			updateScore();
+			updateLives();
+
+			// Si el jugador pierde todas sus vidas, muestra el puntaje final y reinicia el juego
+			if (lives <= 0) {
+				gameOver();
+				return;
+			}
+
+			// Controla la velocidad de actualización del juego
+			requestAnimationFrame(main);
+		}
+
+		// Actualiza la posición del coche y el obstáculo
+		function update() {
+			// Mueve el obstáculo hacia abajo
+			obsY += obsSpeed;
+
+			// Comprueba si el obstáculo choca con el coche
+			if (obsY + obsHeight >= carY && obsX + obsWidth >= carX && obsX <= carX + carWidth) {
+				lives--;
+				obsX = Math.random() * (canvas.width - obsWidth);
+				obsY = -obsHeight;
+			}
+
+			// Si el obstáculo llega al final del canvas, lo reinicia en una posición aleatoria
+			if (obsY > canvas.height) {
+				score++;
+				obsX = Math.random() * (canvas.width - obsWidth);
+				obsY = -obsHeight;
+			}
+
+			// Mueve el coche hacia la izquierda o la derecha si se presionan las teclas de flecha correspondientes
+			if (keys.left && carX > 0) {
+				carX -= 5;
+			} else if (keys.right && carX < canvas.width - carWidth) {
+				carX += 5;
+			}
+		}
+
+		// Dibuja el fondo y los objetos del juego en el canvas
+		function draw() {
+			// Dibuja el fondo
+			ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+			// Dibuja el coche y el obstáculo
+		ctx.drawImage(carImg, carX, carY, carWidth, carHeight);
+		ctx.drawImage(obsImg, obsX, obsY, obsWidth, obsHeight);
+	}
+
+	// Actualiza el puntaje en la pantalla
+	function updateScore() {
+		ctx.fillStyle = "black";
+		ctx.font = "20px Arial";
+		ctx.fillText("Score: " + score, 10, 30);
+	}
+
+	// Actualiza las vidas en la pantalla
+	function updateLives() {
+		ctx.fillStyle = "black";
+		ctx.font = "20px Arial";
+		ctx.fillText("Lives: " + lives, canvas.width - 80, 30);
+	}
+	
+	function gameLoop() {
+  clearCanvas();
+  updateCar();
+  updateObstacle(); // Llama a la función updateObstacle para actualizar la posición de los obstáculos
+  drawEverything();
+  requestAnimationFrame(gameLoop);
+}
+	
+			
+	
+	// Función que se ejecuta cuando el jugador pierde todas sus vidas
+	function gameOver() {
+		// Muestra el puntaje final en la pantalla
+		ctx.fillStyle = "black";
+		ctx.font = "50px Arial";
+		ctx.fillText("Game Over", canvas.width / 2 - 150, canvas.height / 2 - 50);
+		ctx.font = "30px Arial";
+		ctx.fillText("tu puntuacion final es: " + score, canvas.width / 2 - 100, canvas.height / 2);
+		ctx.fillText("Presiona cualquier letra para volver a empezar", canvas.width / 2 - 170, canvas.height / 2 + 50);
+
+		// Espera a que el jugador presione cualquier tecla para reiniciar el juego
+		isGameOver = true;
+		document.addEventListener("keydown", function(event) {
+			if (isGameOver) {
+				isGameOver = false;
+				score = 0;
+				lives = 3;
+				carX = canvas.width / 2 - carWidth / 2;
+				obsX = Math.random() * (canvas.width - obsWidth);
+				obsY = -obsHeight;
+				main();
+			}
+		});
+	}
+
+	// Objeto que almacena el estado de las teclas de flecha
+	var keys = {
+		left: false,
+		right: false
+	};
+
+	// Eventos de teclado para mover el coche
+	document.addEventListener("keydown", function(event) {
+		if (event.keyCode === 37) {
+			keys.left = true;
+		} else if (event.keyCode === 39) {
+			keys.right = true;
+		}
+	});
+
+	document.addEventListener("keyup", function(event) {
+		if (event.keyCode === 37) {
+			keys.left = false;
+		} else if (event.keyCode === 39) {
+			keys.right = false;
+		}
+	});
+
+	// Inicia el juego
+	main();
+</script>
+
+</body>
+</html>
